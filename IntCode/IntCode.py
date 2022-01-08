@@ -26,7 +26,6 @@ class Comp:
     def execute(self):
 
         while True:
-            #print(self.prog[self.pc:self.pc+4])
             if self.prog[self.pc] == 99:
                 break
             elif self.prog[self.pc] == 1:

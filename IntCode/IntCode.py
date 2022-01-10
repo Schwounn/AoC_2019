@@ -2,12 +2,13 @@ import re
 
 class Comp:
 
-    def __init__(self, prog):
+    def __init__(self, prog, input_buffer=None):
         self.prog = prog
         self.pc = 0
         self.out_buffer = []
         self.op_map = {int(attribute[3:]) : getattr(self, attribute) for attribute in dir(self)
                        if callable(getattr(self, attribute)) and attribute[:3] == '_op'}
+        self.input_buffer = input_buffer
 
     def get_param_modes(self, pad=None):
         value = self.prog[self.pc] // 100
@@ -46,7 +47,13 @@ class Comp:
         self.pc += 4
 
     def _op3(self):
-        user_data = int(input("> "))
+        if self.input_buffer is not None:
+            try:
+                user_data = self.input_buffer.pop(0)
+            except IndexError as e:
+                raise BufferError
+        else:
+            user_data = int(input("> "))
         a_i = self.prog[self.pc + 1]
         self.prog[a_i] = user_data
         self.pc += 2

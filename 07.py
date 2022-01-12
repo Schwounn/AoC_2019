@@ -30,15 +30,10 @@ def part2(data):
         while not done:
             for i in range(5):
                 comp = comp_list[i]
-                try:
-                    comp.execute()
-                except BufferError as e:
-                    _input = comp.out_buffer[-1]
-                    comp_list[(i + 1) % 5].input_buffer.append(_input)
-                    continue
-                else:
-                    _input = comp.out_buffer[-1]
-                    comp_list[(i + 1) % 5].input_buffer.append(_input)
+                status = comp.execute()
+                _input = comp.out_buffer[-1]
+                comp_list[(i + 1) % 5].input_buffer.append(_input)
+                if status == 0:
                     done = True
         best = max(best, _input)
     return best

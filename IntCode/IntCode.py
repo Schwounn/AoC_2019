@@ -9,6 +9,7 @@ class Comp:
         self.op_map = {int(attribute[3:]) : getattr(self, attribute) for attribute in dir(self)
                        if callable(getattr(self, attribute)) and attribute[:3] == '_op'}
         self.input_buffer = input_buffer
+        self.relative_base = 0
 
     def get_param_modes(self, pad=None):
         value = self.prog[self.pc] // 100
@@ -22,9 +23,16 @@ class Comp:
 
     def get_value(self, mode, param_addr):
         if mode == 0:
-            return self.prog[param_addr]
+            ret = self.prog[param_addr]
         elif mode == 1:
-            return param_addr
+            ret = param_addr
+        elif mode == 2:
+            ret = self.prog[param_addr] + self.relative_base
+
+        if ret >= len(self.prog):
+            self.prog = (self.prog + (ret + 1) * [0])[:ret + 1]
+        return ret
+
 
     def get_values(self, modes):
         ret = []
@@ -85,6 +93,11 @@ class Comp:
         a_i, b_i, c_i = self.get_values(self.get_param_modes(pad=3))
         self.prog[c_i] = 1 if self.prog[a_i] == self.prog[b_i] else 0
         self.pc += 4
+
+    def _op9(self):
+        a_i, = self.get_values(self.get_param_modes(pad=1))
+        self.relative_base += self.prog[a_i]
+        self.pc += 2
 
     def _op99(self):
         return 0

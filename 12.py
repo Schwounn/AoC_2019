@@ -73,8 +73,8 @@ def part2(positions):
     positions = [[p[i] for p in positions] for i in range(3)]
     velocities = [[0, 0, 0, 0] for pos in positions]
     cycles = [sim_dim_to_end(p, v) for p, v in zip(positions, velocities)]
-    g = math.gcd(*cycles)
-    return math.prod(map(lambda x : x // g, cycles))
+    return math.lcm(*cycles)
+
 
 def main():
     data = read_input()

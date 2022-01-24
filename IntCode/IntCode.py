@@ -2,7 +2,7 @@ import re
 
 class Comp:
 
-    def __init__(self, prog, input_buffer=None):
+    def __init__(self, prog, input_buffer=None, mute=False):
         self.prog = prog
         self.pc = 0
         self.out_buffer = []
@@ -10,6 +10,7 @@ class Comp:
                        if callable(getattr(self, attribute)) and attribute[:3] == '_op'}
         self.input_buffer = input_buffer
         self.relative_base = 0
+        self.mute = mute
 
     def get_param_modes(self, pad=None):
         value = self.prog[self.pc] // 100
@@ -66,7 +67,8 @@ class Comp:
 
     def _op4(self):
         a_i, = self.get_values(self.get_param_modes(pad=1))
-        print(f'* {self.prog[a_i]}')
+        if not self.mute:
+            print(f'* {self.prog[a_i]}')
         self.out_buffer.append(self.prog[a_i])
         self.pc += 2
 

@@ -1,8 +1,8 @@
 from queue import PriorityQueue
-
+from copy import copy
 
 def read_input():
-    return [line.strip() for line in open('18.in')]
+    return [list(line.strip()) for line in open('18.in')]
 
 
 def get_start(data, key='@'):
@@ -17,7 +17,7 @@ def get_neighbors(x, y):
 
 
 def get_all_keys(data):
-    return ''.join(sorted([c for c in ''.join(data) if c.islower()]))
+    return ''.join(sorted([c for c in ''.join([''.join(line) for line in data]) if c.islower()]))
 
 
 def get_paths_from(key, data):
@@ -47,34 +47,62 @@ def get_paths_from(key, data):
     return paths
 
 
-def part1(data):
-    start = 0, get_start(data), ''
+def replace_start(data):
+    x, y = get_start(data)
+    data[y - 1][x - 1:x + 2] = ['1', '#', '2']
+    data[y][x - 1:x + 2] = ['#', '#', '#']
+    data[y + 1][x - 1:x + 2] = ['3', '#', '4']
+
+
+def part2(data):
+    replace_start(data)
+    start = 0, ('1', '2', '3', '4'), ''
     all_keys = get_all_keys(data)
     q = PriorityQueue()
     q.put(start)
     visited = set()
+    paths = {key: get_paths_from(key, data) for key in all_keys + '1234'}
     while not q.empty():
-        cost, coord, keys = q.get()
-        if (coord, keys) in visited:
+        cost, node, keys = q.get()
+        if (node, keys) in visited:
             continue
-        if keys == all_keys:
+        if all(k in keys for k in all_keys):
             return cost
-        visited.add((coord, keys))
-        for nx, ny in get_neighbors(*coord):
-            tile = data[ny][nx]
-            if tile == '#':
-                continue
-            if tile.isupper() and tile.lower() not in keys:
-                continue
-            q.put((cost + 1, (nx, ny), ''.join(sorted(set(keys + (tile if tile.islower() else ''))))))
+        visited.add((node, keys))
+        for i, k in enumerate(node):
+            for nk in [i for i in paths[k] if i not in keys]:
+                if not all(elem in keys for elem in paths[k][nk][1].lower()):
+                    continue
+                nnode = list(node)
+                nnode[i] = nk
+                nnode = tuple(nnode)
+                q.put((cost + paths[k][nk][0], nnode, ''.join(sorted(set(keys + nk)))))
+    return -1
 
-
+def part1(data):
+    start = 0, '@', ''
+    all_keys = get_all_keys(data)
+    q = PriorityQueue()
+    q.put(start)
+    visited = set()
+    paths = {key: get_paths_from(key, data) for key in all_keys + '@'}
+    while not q.empty():
+        cost, k, keys = q.get()
+        if (k, keys) in visited:
+            continue
+        if all(k in keys for k in all_keys):
+            return cost
+        visited.add((k, keys))
+        for nk in [i for i in paths[k] if i not in keys]:
+            if not all(elem in keys for elem in paths[k][nk][1].lower()):
+                continue
+            q.put((cost + paths[k][nk][0], nk, ''.join(sorted(set(keys + nk)))))
     return -1
 
 
 def main():
     data = read_input()
-    return get_paths_from('@', data)
+    return part1(data), part2(copy(data))
 
 
 if __name__ == '__main__':

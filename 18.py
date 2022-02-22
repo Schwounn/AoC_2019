@@ -5,10 +5,11 @@ def read_input():
     return [line.strip() for line in open('18.in')]
 
 
-def get_start(data):
+def get_start(data, key='@'):
     for y, line in enumerate(data):
-        if '@' in line:
-            return line.index('@'), y
+        if key in line:
+            return line.index(key), y
+    return None, None
 
 def get_neighbors(x, y):
     diffs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -17,6 +18,34 @@ def get_neighbors(x, y):
 
 def get_all_keys(data):
     return ''.join(sorted([c for c in ''.join(data) if c.islower()]))
+
+
+def get_paths_from(key, data):
+    start = 0, get_start(data, key=key), ''
+    all_keys = get_all_keys(data)
+    q = PriorityQueue()
+    q.put(start)
+    visited = set()
+    paths = {}
+    while not q.empty():
+        cost, coord, doors = q.get()
+        if coord in visited:
+            continue
+        visited.add(coord)
+        if data[coord[1]][coord[0]].islower():
+            paths[data[coord[1]][coord[0]]] = (cost, doors)
+        if len(paths) == len(all_keys):
+            return paths
+        for nx, ny in get_neighbors(*coord):
+            ndoors = doors
+            tile = data[ny][nx]
+            if tile == '#':
+                continue
+            if tile.isupper():
+                ndoors += tile
+            q.put((cost + 1, (nx, ny), ndoors))
+    return paths
+
 
 def part1(data):
     start = 0, get_start(data), ''
@@ -30,7 +59,6 @@ def part1(data):
             continue
         if keys == all_keys:
             return cost
-        print(cost)
         visited.add((coord, keys))
         for nx, ny in get_neighbors(*coord):
             tile = data[ny][nx]
@@ -46,7 +74,7 @@ def part1(data):
 
 def main():
     data = read_input()
-    return part1(data)
+    return get_paths_from('@', data)
 
 
 if __name__ == '__main__':

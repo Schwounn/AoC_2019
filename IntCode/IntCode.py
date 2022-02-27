@@ -34,6 +34,15 @@ class Comp:
             self.prog = (self.prog + (ret + 1) * [0])[:ret + 1]
         return ret
 
+    def feed_ascii(self, string):
+        self.input_buffer += list(map(ord, string))
+
+
+    def pop_ascii(self):
+        ret = ''.join(map(chr, self.out_buffer))
+        self.out_buffer = []
+        return ret
+
 
     def get_values(self, modes):
         ret = []

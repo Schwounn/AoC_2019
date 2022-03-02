@@ -120,3 +120,7 @@ class Comp:
             if status is not None:
                 return status
 
+
+    def execute_one(self):
+        opcode = self.prog[self.pc] % 100
+        return self.op_map[opcode]()

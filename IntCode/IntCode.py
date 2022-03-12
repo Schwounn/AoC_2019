@@ -34,8 +34,8 @@ class Comp:
             self.prog = (self.prog + (ret + 1) * [0])[:ret + 1]
         return ret
 
-    def feed_ascii(self, string):
-        self.input_buffer += list(map(ord, string))
+    def feed_ascii(self, string, end=''):
+        self.input_buffer += list(map(ord, string + end))
 
 
     def pop_ascii(self):
